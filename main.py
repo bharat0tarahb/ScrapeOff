@@ -1,3 +1,4 @@
+#import necessary libraries
 import requests
 import bs4
 import pandas as pd
@@ -5,26 +6,17 @@ import argparse
 import scraper
 import re
 
-html_attributes = {
-    "title": "title",
-    "division": "div",
-    "table": "table",
-    "tableHead": "thead",
-    "tableRow": "tr",
-    "tableData": "td",
-    "tableBody": "tbody",
-    "para1": "p",
-    "para2": "strong"
-}
-
-container_content_types = ['col-lg-12 col-md-12 col-sm-12 col-xs-12', 'col-12']
-table_content_types = ['table table-striped']
 
 if __name__ == '__main__':
     # construct the argument parse and parse the arguments
     ap = argparse.ArgumentParser() 
     ap.add_argument("-w", "--website", required=True, help="Website to scrape") # i is an argument which denoted input string
     args = vars(ap.parse_args())
+
+    #importing global attributes from scraper
+    html_attributes = scraper.html_attributes 
+    container_content_types = scraper.container_content_types
+    table_content_types = scraper.table_content_types
     
     
     res = requests.get(args["website"]) #send a GET request to website and store the response
@@ -54,43 +46,14 @@ if __name__ == '__main__':
             print(tableName)
             rows = [] #create a list object to store rows and heads of the table 
             if tableName not in  ['Director Details', 'Contact Details']:
-                tables = scraper.fetchAllItems(content, html_attributes['table'], class_type = table_content_types[0])
-                for table in tables:
-                    tableHead = scraper.fetchTableHead(table, html_attributes, html_attributes['para1'], None)
-                    if tableHead is None or tableHead[0][0] == 'Unable to fetch Value':
-                        tableHead = scraper.fetchTableHead(table, html_attributes, html_attributes['para2'], None)
-                    if tableHead is not None:
-                        for th in tableHead:
-                            rows.append(th)
-                            print(th)
-                    tableRows = scraper.fetchTableBody(table, html_attributes, html_attributes['para1'], None)
-                    if tableRows[0] is None:
-                        tableRows = tableRows = scraper.fetchTableBody(table, html_attributes, html_attributes['para2'], None)
-                    if tableRows is not None:
-                        for tr in tableRows:
-                            rows.append(tr)
-                            print(tr)
+                rows = scraper.case1(content) #Handles case1 usecase and outputs a list of rows from tables
             elif tableName == 'Director Details':
-                table = scraper.fetchItem(content, html_attributes['table'], class_type = table_content_types[0])
-                tableHead = scraper.fetchTableHead(table, html_attributes, html_attributes['para1'], None)
-                if tableHead is None or tableHead[0][0] == 'Unable to fetch Value':
-                    tableHead = scraper.fetchTableHead(table, html_attributes, html_attributes['para2'], None)
-                if tableHead is not None:
-                    for th in tableHead:
-                        rows.append(th)
-                        print(th)
-                tableRows = scraper.fetchTableBody(table, html_attributes, html_attributes['para1'], "accordion-toggle main-row")
-                if tableRows[0] is None:
-                    tableRows = tableRows = scraper.fetchTableBody(table, html_attributes, html_attributes['para2'], "accordion-toggle main-row")
-                if tableRows is not None:
-                    for tr in tableRows:
-                        rows.append(tr)
+                rows = scraper.case2(content) #Handles case2 usecase and outputs a list of rows from tables
             elif tableName == 'Contact Details':
-                rowList = content.find_all('p')
-                for row in rowList:
-                    rows.append(row.text.strip())
+                rows = scraper.case3(content) #Handles case3 usecase and outputs a list of rows from tables
 
-            dfs.append([pd.DataFrame(rows), tableName])
-    scraper.writeDftoexcell(writer, dfs)
+            dfs.append([pd.DataFrame(rows), tableName]) #output rows are strored as data frame objects and contained in a list
+    scraper.writeDftoexcell(writer, dfs) #each dataframe containing data from each table is been written to excell sheets and stored in to a file
+    print(f'File {companyName}.xlsx saved at your present working directory')
 
             
