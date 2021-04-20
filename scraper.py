@@ -1,5 +1,6 @@
 import requests
 import bs4
+import re
 
 
 def fetchItem(data, attribute, class_type):
@@ -24,10 +25,10 @@ def fetchAllItems(data, attribute, class_type):
   return items
 
 
-def fetchTableHead(table, table_attributes, special_attribute):
+def fetchTableHead(table, table_attributes, special_attribute, class_type):
   try:
     tableHeadItem = fetchItem(table, table_attributes['tableHead'], class_type = None)
-    tableHead = fetchTableRows(tableHeadItem, table_attributes, special_attribute)
+    tableHead = fetchTableRows(tableHeadItem, table_attributes, special_attribute, class_type)
   except Exception as e:
     tableHead = None
   return tableHead
@@ -48,28 +49,28 @@ def fetchTableData(table, table_attributes, special_attribute):
   return row
 
 
-def fetchTableRows(table, table_attributes, special_attribute):
+def fetchTableRows(table, table_attributes, special_attribute, class_type):
   rows = []
-  rowItems = fetchAllItems(table, table_attributes['tableRow'], class_type = None)
+  rowItems = fetchAllItems(table, table_attributes['tableRow'], class_type = class_type)
   for rowItem in rowItems:
     row = fetchTableData(rowItem , table_attributes, special_attribute)
     rows.append(row)
   return rows
 
 
-def fetchTableBody(table, table_attributes, special_attribute):
+def fetchTableBody(table, table_attributes, special_attribute, class_type):
   try:
     tableBodyItem = fetchItem(table, table_attributes['tableBody'], class_type = None)
     if tableBodyItem is None:
-      tableRows = fetchTableRows(table, table_attributes, special_attribute)
+      tableRows = fetchTableRows(table, table_attributes, special_attribute, class_type)
     else:
-      tableRows = fetchTableRows(tableBodyItem, table_attributes, special_attribute)
+      tableRows = fetchTableRows(tableBodyItem, table_attributes, special_attribute, class_type)
   except Exception as e:
     tableRows = None
   return tableRows
 
 
-  def writeDftoexcell(writer, dfList):
+def writeDftoexcell(writer, dfList):
     for df in dfList:
         try:
             sheetName = df[1]

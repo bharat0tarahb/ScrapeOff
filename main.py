@@ -53,21 +53,43 @@ if __name__ == '__main__':
             tableName = scraper.fetchItem(content, 'h4', class_type = None).text.strip() #fetch table name
             print(tableName)
             rows = [] #create a list object to store rows and heads of the table 
-            if tableName != 'Director Details':
+            if tableName not in  ['Director Details', 'Contact Details']:
                 tables = scraper.fetchAllItems(content, html_attributes['table'], class_type = table_content_types[0])
                 for table in tables:
-                    tableHead = scraper.fetchTableHead(table, html_attributes, html_attributes['para1'])
+                    tableHead = scraper.fetchTableHead(table, html_attributes, html_attributes['para1'], None)
                     if tableHead is None or tableHead[0][0] == 'Unable to fetch Value':
-                        tableHead = scraper.fetchTableHead(table, html_attributes, html_attributes['para2'])
+                        tableHead = scraper.fetchTableHead(table, html_attributes, html_attributes['para2'], None)
                     if tableHead is not None:
                         for th in tableHead:
                             rows.append(th)
-                    tableRows = scraper.fetchTableBody(table, html_attributes, html_attributes['para1'])
+                            print(th)
+                    tableRows = scraper.fetchTableBody(table, html_attributes, html_attributes['para1'], None)
                     if tableRows[0] is None:
-                        tableRows = tableRows = scraper.fetchTableBody(table, html_attributes, html_attributes['para2'])
+                        tableRows = tableRows = scraper.fetchTableBody(table, html_attributes, html_attributes['para2'], None)
                     if tableRows is not None:
                         for tr in tableRows:
                             rows.append(tr)
+                            print(tr)
+            elif tableName == 'Director Details':
+                table = scraper.fetchItem(content, html_attributes['table'], class_type = table_content_types[0])
+                tableHead = scraper.fetchTableHead(table, html_attributes, html_attributes['para1'], None)
+                if tableHead is None or tableHead[0][0] == 'Unable to fetch Value':
+                    tableHead = scraper.fetchTableHead(table, html_attributes, html_attributes['para2'], None)
+                if tableHead is not None:
+                    for th in tableHead:
+                        rows.append(th)
+                        print(th)
+                tableRows = scraper.fetchTableBody(table, html_attributes, html_attributes['para1'], "accordion-toggle main-row")
+                if tableRows[0] is None:
+                    tableRows = tableRows = scraper.fetchTableBody(table, html_attributes, html_attributes['para2'], "accordion-toggle main-row")
+                if tableRows is not None:
+                    for tr in tableRows:
+                        rows.append(tr)
+            elif tableName == 'Contact Details':
+                rowList = content.find_all('p')
+                for row in rowList:
+                    rows.append(row.text.strip())
+
             dfs.append([pd.DataFrame(rows), tableName])
     scraper.writeDftoexcell(writer, dfs)
 
