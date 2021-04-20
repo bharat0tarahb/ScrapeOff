@@ -5,7 +5,7 @@ import pandas as pd
 import argparse
 import scraper
 import re
-
+import os
 
 if __name__ == '__main__':
     # construct the argument parse and parse the arguments
@@ -26,7 +26,10 @@ if __name__ == '__main__':
     companyName = scraper.fetchItem(soup, html_attributes['title'], class_type = None).text.strip().split(",")[0].split('-')[0].strip()
     
     #Initiate pandas excelwriter with the company name as file  name
-    writer = pd.ExcelWriter(f'{companyName}.xlsx', engine='xlsxwriter') 
+    output_directory = 'outputs'
+    if not os.path.exists(output_directory):
+        os.mkdir(output_directory)
+    writer = pd.ExcelWriter(f'{output_directory}/{companyName}.xlsx', engine='xlsxwriter') 
     print(companyName)
     
     # Fetch decription of the company
@@ -54,6 +57,6 @@ if __name__ == '__main__':
 
             dfs.append([pd.DataFrame(rows), tableName]) #output rows are strored as data frame objects and contained in a list
     scraper.writeDftoexcell(writer, dfs) #each dataframe containing data from each table is been written to excell sheets and stored in to a file
-    print(f'File {companyName}.xlsx saved at your present working directory')
+    print(f'File {output_directory}/{companyName}.xlsx has been saved')
 
             
