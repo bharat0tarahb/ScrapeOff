@@ -2,7 +2,7 @@
 A typo-tolerant search algorithm to identify the top matches.
 
 # Design
-<img src="https://github.com/bharat0tarahb/relevancyMatcher/blob/main/Relevancy%20Match%20Design.png" width=1000>
+<img src="https://github.com/bharat0tarahb/ScrapeOff/blob/main/ScrapOff%20Design.png" width=1000>
 
 # How does it work?
 When the user enters his word
